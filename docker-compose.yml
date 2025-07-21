@@ -1,9 +1,13 @@
 version: "3.7"
 
+networks:
+  private:
+
 services:
   caddy:
     image: caddy:latest
     restart: unless-stopped
+    networks: ['private']
     ports:
       - "80:80"
       - "443:443"
@@ -15,6 +19,7 @@ services:
   n8n:
     image: docker.n8n.io/n8nio/n8n
     restart: always
+    networks: ['private']
     ports:
       - 5678:5678
     environment:
@@ -27,9 +32,21 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
       - ${DATA_FOLDER}/local_files:/files
+
+  qdrant:
+    image: qdrant/qdrant
+    hostname: qdrant
+    container_name: qdrant
+    networks: ['private']
+    restart: unless-stopped
+    ports:
+      - 6333:6333
+    volumes:
+      - qdrant_storage:/qdrant/storage
       
 volumes:
   caddy_data:
     external: true
   n8n_data:
     external: true
+  qdrant_storage:
